@@ -6,11 +6,13 @@ extern crate serde;
 extern crate sha2;
 extern crate simplelog;
 extern crate termcolor;
+extern crate zip;
 
 use clap::*;
 use simplelog::*;
 use crate::commands::add::execute_add;
-use crate::commands::config::execute_config;
+use crate::commands::info::execute_info;
+use crate::commands::pack::execute_pack;
 use crate::commands::update::execute_update;
 
 const APP_NAME: &str = "git-cf";
@@ -33,26 +35,26 @@ fn main() {
                 )
         )
         .subcommand(
-            App::new("config")
-                .about("Prints the configurations")
+            App::new("info")
+                .about("Prints the information")
+                .version(crate_version!())
+                .author(AUTHOR_NAME)
+        )
+        .subcommand(
+            App::new("pack")
+                .about("Compresses binaries into one file")
+                .version(crate_version!())
+                .author(AUTHOR_NAME)
+        )
+        .subcommand(
+            App::new("patch")
+                .about("Extracts binaries")
                 .version(crate_version!())
                 .author(AUTHOR_NAME)
         )
         .subcommand(
             App::new("update")
                 .about("Updates \"git-cf.json\" with infos")
-                .version(crate_version!())
-                .author(AUTHOR_NAME)
-        )
-        .subcommand(
-            App::new("zip")
-                .about("Compresses binaries into one file")
-                .version(crate_version!())
-                .author(AUTHOR_NAME)
-        )
-        .subcommand(
-            App::new("unzip")
-                .about("Extracts binaries")
                 .version(crate_version!())
                 .author(AUTHOR_NAME)
         )
@@ -73,8 +75,17 @@ fn main() {
         }
     }
 
-    if let Some(matches) = matches.subcommand_matches("config") {
-        match execute_config(matches) {
+    if let Some(matches) = matches.subcommand_matches("info") {
+        match execute_info(matches) {
+            Ok(_) => { },
+            Err(msg) => {
+                error!("{}", msg);
+            }
+        }
+    }
+
+    if let Some(matches) = matches.subcommand_matches("pack") {
+        match execute_pack(matches) {
             Ok(_) => { },
             Err(msg) => {
                 error!("{}", msg);
@@ -93,5 +104,6 @@ fn main() {
 }
 
 pub mod commands;
+pub mod compressor;
 pub mod hash;
 pub mod settings;
