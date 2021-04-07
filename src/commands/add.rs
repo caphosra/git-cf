@@ -1,7 +1,8 @@
 use clap::ArgMatches;
+use crate::error::GitCFError;
 use crate::settings::Settings;
 
-pub fn execute_add(matches: &ArgMatches) -> Result<(), String> {
+pub fn execute_add(matches: &ArgMatches) -> Result<(), GitCFError> {
     let mut settings = Settings::load_file()?;
 
     settings.files.push(matches.value_of("FILE").unwrap().to_string());

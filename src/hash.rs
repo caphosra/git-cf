@@ -1,35 +1,27 @@
 use std::{fs::File, io::Read};
 use serde_json::to_string;
 use sha2::{ Digest, Sha256 };
+use crate::error::GitCFError;
 use crate::settings::Settings;
 
-fn digest(buffer: &[u8]) -> Result<String, String> {
+fn digest(buffer: &[u8]) -> Result<String, GitCFError> {
     let result = Sha256::digest(buffer);
     let result = format!("{:X}", result);
 
     Ok(result)
 }
 
-pub fn digest_file(path: &String) -> Result<String, String> {
-    let mut file = File::open(&path)
-        .map_err(|err| {
-            err.to_string()
-        })?;
+pub fn digest_file(path: &String) -> Result<String, GitCFError> {
+    let mut file = File::open(&path)?;
 
     let mut buffer = String::new();
-    file.read_to_string(&mut buffer)
-        .map_err(|err| {
-            err.to_string()
-        })?;
+    file.read_to_string(&mut buffer)?;
 
     digest(buffer.as_bytes())
 }
 
-pub fn digest_settings(settings: &Settings) -> Result<String, String> {
-    let settings_buffer = to_string(settings)
-        .map_err(|err| {
-            err.to_string()
-        })?;
+pub fn digest_settings(settings: &Settings) -> Result<String, GitCFError> {
+    let settings_buffer = to_string(settings)?;
 
     digest(settings_buffer.as_bytes())
 }

@@ -1,8 +1,9 @@
 use clap::ArgMatches;
 use crate::compressor::compress;
+use crate::error::GitCFError;
 use crate::settings::Settings;
 
-pub fn execute_pack(_: &ArgMatches) -> Result<(), String> {
+pub fn execute_pack(_: &ArgMatches) -> Result<(), GitCFError> {
     let settings = Settings::load_file()?;
     match settings.validate()? {
         Some(_) => {

@@ -1,41 +1,45 @@
-use std::io::Error;
 use std::fmt;
+use std::io::Error;
 use zip::result::ZipError;
 
-pub enum GitCFError<'a> {
+pub enum GitCFError {
     IOError(Box<Error>),
-    StringError(&'a str),
+    JsonError(Box<serde_json::error::Error>),
+    StringError(String),
     ZipError(Box<ZipError>)
 }
 
-impl<'a> From<Error> for GitCFError<'a> {
-    fn from(err: Error) -> GitCFError<'a> {
+impl From<Error> for GitCFError {
+    fn from(err: Error) -> GitCFError {
         GitCFError::IOError(
             Box::new(err)
         )
     }
 }
 
-impl<'a> From<&'a str> for GitCFError<'a> {
-    fn from(err: &'a str) -> GitCFError<'a> {
-        GitCFError::StringError(
-            err
+impl From<serde_json::error::Error> for GitCFError {
+    fn from(err: serde_json::error::Error) -> GitCFError {
+        GitCFError::JsonError(
+            Box::new(err)
         )
     }
 }
 
-impl<'a> From<ZipError> for GitCFError<'a> {
-    fn from(err: ZipError) -> GitCFError<'a> {
+impl From<ZipError> for GitCFError {
+    fn from(err: ZipError) -> GitCFError {
         GitCFError::ZipError(
             Box::new(err)
         )
     }
 }
 
-impl<'a> fmt::Display for GitCFError<'a> {
+impl fmt::Display for GitCFError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             GitCFError::IOError(err) => {
+                write!(f, "{}", err)
+            },
+            GitCFError::JsonError(err) => {
                 write!(f, "{}", err)
             },
             GitCFError::StringError(err) => {

@@ -1,7 +1,8 @@
 use clap::ArgMatches;
+use crate::error::GitCFError;
 use crate::settings::Settings;
 
-pub fn execute_update(_: &ArgMatches) -> Result<(), String> {
+pub fn execute_update(_: &ArgMatches) -> Result<(), GitCFError> {
     let settings = Settings::load_file()?;
     match settings.validate()? {
         Some(settings) => {
