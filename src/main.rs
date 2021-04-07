@@ -105,5 +105,6 @@ fn main() {
 
 pub mod commands;
 pub mod compressor;
+pub mod error;
 pub mod hash;
 pub mod settings;
