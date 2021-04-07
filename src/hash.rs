@@ -25,3 +25,9 @@ pub fn digest_settings(settings: &Settings) -> Result<String, GitCFError> {
 
     digest(settings_buffer.as_bytes())
 }
+
+pub fn get_patch_name(settings: &Settings) -> Result<String, GitCFError> {
+    let digest = digest_settings(settings)?;
+
+    Ok(format!("./patch-{}.zip", &digest[..10]))
+}

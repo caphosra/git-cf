@@ -3,16 +3,11 @@ use std::io::{ Read, Write };
 use zip::*;
 use zip::write::*;
 use crate::error::GitCFError;
-use crate::hash::digest_settings;
+use crate::hash::get_patch_name;
 use crate::settings::Settings;
 
 pub fn compress(settings: &Settings) -> Result<(), GitCFError> {
-    let zip_file_path = format!(
-        "./patch-{}.zip",
-        digest_settings(settings)?
-    );
-
-    let mut zip_file = File::create(zip_file_path)?;
+    let mut zip_file = File::create(get_patch_name(settings)?)?;
 
     let mut zip = ZipWriter::new(&mut zip_file);
     let options = FileOptions::default().compression_method(CompressionMethod::Stored);

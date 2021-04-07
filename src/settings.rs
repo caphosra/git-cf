@@ -5,7 +5,7 @@ use serde::{ Deserialize, Serialize };
 use serde_json::{ from_str, to_string };
 use termcolor::*;
 use crate::error::GitCFError;
-use crate::hash::digest_file;
+use crate::hash::{ digest_file, get_patch_name };
 
 const SETTINGS_FILE_NAME: &str = "./git-cf.json";
 
@@ -34,11 +34,11 @@ impl Settings {
             let mut settings_buffer = String::new();
             settings_file.read_to_string(&mut settings_buffer)?;
 
-            info!("Read \"{}\" successfully.", SETTINGS_FILE_NAME);
+            debug!("Read \"{}\" successfully.", SETTINGS_FILE_NAME);
 
             let result: Settings = from_str(settings_buffer.as_str())?;
 
-            info!("Parsed \"{}\" successfully.", SETTINGS_FILE_NAME);
+            debug!("Parsed \"{}\" successfully.", SETTINGS_FILE_NAME);
 
             Ok(result)
         }
@@ -49,11 +49,11 @@ impl Settings {
         let mut settings_file = File::create(path)?;
         let settings_buffer = to_string(self)?;
 
-        info!("Parsed \"{}\" successfully.", SETTINGS_FILE_NAME);
+        debug!("Parsed \"{}\" successfully.", SETTINGS_FILE_NAME);
 
         settings_file.write_all(settings_buffer.as_bytes())?;
 
-        info!("Wrote \"{}\" successfully.", SETTINGS_FILE_NAME);
+        debug!("Wrote \"{}\" successfully.", SETTINGS_FILE_NAME);
 
         Ok(())
     }
@@ -87,20 +87,28 @@ impl Settings {
         }
     }
 
-     fn print_with_color(&self, stdout: &mut StandardStream, color: Color, text: &str) -> Result<(), GitCFError> {
-        stdout.set_color(
-                ColorSpec::new().set_fg(Some(color))
-            )?;
-
-        writeln!(stdout, "{}", text)?;
-
-        stdout.reset()?;
-
-        Ok(())
-    }
-
     pub fn print_config(&self) -> Result<(), GitCFError> {
         let mut stdout = StandardStream::stdout(ColorChoice::Always);
+
+        write!(&mut stdout, "Patch name: ")?;
+        stdout.set_color(ColorSpec::new().set_fg(Some(Color::Cyan)))?;
+        writeln!(&mut stdout, "{}", get_patch_name(self)?)?;
+        stdout.reset()?;
+
+        write!(&mut stdout, "Up to date: ")?;
+
+        match self.validate()? {
+            Some(_) => {
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Red)))?;
+                writeln!(stdout, "NO")?;
+                stdout.reset()?;
+            },
+            None => {
+                stdout.set_color(ColorSpec::new().set_fg(Some(Color::Green)))?;
+                writeln!(stdout, "YES")?;
+                stdout.reset()?;
+            }
+        }
 
         writeln!(&mut stdout, "[Files]")?;
 
@@ -113,20 +121,11 @@ impl Settings {
             if digest.eq(hash) {
                 color = Color::Green;
             }
-            self.print_with_color(&mut stdout, color, file)?;
+            stdout.set_color(ColorSpec::new().set_fg(Some(color)))?;
+            writeln!(stdout, "{}", file)?;
+            stdout.reset()?;
 
             writeln!(&mut stdout, " ({})", digest)?;
-        }
-
-        write!(&mut stdout, "Up to date : ")?;
-
-        match self.validate()? {
-            Some(_) => {
-                self.print_with_color(&mut stdout, Color::Red, "NO")?;
-            },
-            None => {
-                self.print_with_color(&mut stdout, Color::Green, "YES")?;
-            }
         }
 
         Ok(())
