@@ -12,8 +12,10 @@ use clap::*;
 use simplelog::*;
 use crate::commands::add::execute_add;
 use crate::commands::info::execute_info;
+use crate::commands::init::execute_init;
 use crate::commands::pack::execute_pack;
 use crate::commands::patch::execute_patch;
+use crate::commands::remove::execute_remove;
 use crate::commands::update::execute_update;
 
 const APP_NAME: &str = "git-cf";
@@ -42,6 +44,12 @@ fn main() {
                 .author(AUTHOR_NAME)
         )
         .subcommand(
+            App::new("init")
+                .about("Initializes this project")
+                .version(crate_version!())
+                .author(AUTHOR_NAME)
+        )
+        .subcommand(
             App::new("pack")
                 .about("Compresses binaries into one file")
                 .version(crate_version!())
@@ -52,6 +60,17 @@ fn main() {
                 .about("Extracts binaries")
                 .version(crate_version!())
                 .author(AUTHOR_NAME)
+        )
+        .subcommand(
+            App::new("remove")
+                .about("Removes file to \"git-cf.json\"")
+                .version(crate_version!())
+                .author(AUTHOR_NAME)
+                .arg(
+                    Arg::with_name("FILE")
+                        .required(true)
+                        .help("A file which is going to be removed")
+                )
         )
         .subcommand(
             App::new("update")
@@ -85,6 +104,15 @@ fn main() {
         }
     }
 
+    if let Some(matches) = matches.subcommand_matches("init") {
+        match execute_init(matches) {
+            Ok(_) => { },
+            Err(msg) => {
+                error!("{}", msg);
+            }
+        }
+    }
+
     if let Some(matches) = matches.subcommand_matches("pack") {
         match execute_pack(matches) {
             Ok(_) => { },
@@ -96,6 +124,15 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("patch") {
         match execute_patch(matches) {
+            Ok(_) => { },
+            Err(msg) => {
+                error!("{}", msg);
+            }
+        }
+    }
+
+    if let Some(matches) = matches.subcommand_matches("remove") {
+        match execute_remove(matches) {
             Ok(_) => { },
             Err(msg) => {
                 error!("{}", msg);
