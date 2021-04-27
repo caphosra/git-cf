@@ -14,10 +14,10 @@ fn digest(buffer: &[u8]) -> Result<String, GitCFError> {
 pub fn digest_file(path: &String) -> Result<String, GitCFError> {
     let mut file = File::open(&path)?;
 
-    let mut buffer = String::new();
-    file.read_to_string(&mut buffer)?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer)?;
 
-    digest(buffer.as_bytes())
+    digest(&buffer)
 }
 
 pub fn digest_settings(settings: &Settings) -> Result<String, GitCFError> {
