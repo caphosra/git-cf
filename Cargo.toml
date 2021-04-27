@@ -1,6 +1,6 @@
 [package]
 name = "git-cf"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Akihisa Yagi <capra314cabra@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "This is a git extension which compresses files into one file and also restores them from it. It is useful when you need to work with files which is unfamiliar to git, such as binary files or security ones."
