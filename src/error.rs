@@ -1,25 +1,45 @@
 use std::fmt;
-use std::io::Error;
+use std::io::Error as IOError;
+use glob::{ GlobError, PatternError };
+use serde_json::error::Error as JsonError;
 use zip::result::ZipError;
 
 pub enum GitCFError {
-    IOError(Box<Error>),
-    JsonError(Box<serde_json::error::Error>),
+    IOError(Box<IOError>),
+    JsonError(Box<JsonError>),
+    GlobError(Box<GlobError>),
+    PatternError(Box<PatternError>),
     StringError(String),
     ZipError(Box<ZipError>)
 }
 
-impl From<Error> for GitCFError {
-    fn from(err: Error) -> GitCFError {
+impl From<IOError> for GitCFError {
+    fn from(err: IOError) -> GitCFError {
         GitCFError::IOError(
             Box::new(err)
         )
     }
 }
 
-impl From<serde_json::error::Error> for GitCFError {
-    fn from(err: serde_json::error::Error) -> GitCFError {
+impl From<JsonError> for GitCFError {
+    fn from(err: JsonError) -> GitCFError {
         GitCFError::JsonError(
+            Box::new(err)
+        )
+    }
+}
+
+impl From<GlobError> for GitCFError {
+    fn from(err: GlobError) -> GitCFError {
+        GitCFError::GlobError(
+            Box::new(err)
+        )
+    }
+}
+
+impl From<PatternError> for GitCFError {
+    fn from(err: PatternError) -> GitCFError {
+        GitCFError::PatternError(
             Box::new(err)
         )
     }
@@ -43,6 +63,12 @@ impl fmt::Display for GitCFError {
                 write!(f, "{}", err)
             },
             GitCFError::StringError(err) => {
+                write!(f, "{}", err)
+            },
+            GitCFError::GlobError(err) => {
+                write!(f, "{}", err)
+            },
+            GitCFError::PatternError(err) => {
                 write!(f, "{}", err)
             },
             GitCFError::ZipError(err) => {
